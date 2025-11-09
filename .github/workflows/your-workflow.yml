@@ -1,0 +1,56 @@
+name: Multi-Platform Matrix Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20]
+        include:
+          - os: ubuntu-latest
+            node-version: 16  # Include additional matrix combination
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: matrix-41e29d1
+      run: |
+        echo "Building for ${{ matrix.os }} with Node.js ${{ matrix.node-version }}"
+        echo "Matrix identifier: matrix-41e29d1"  # Added required identifier
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Generate build artifact
+      run: |
+        echo "Build Information" > build-output.txt
+        echo "==================" >> build-output.txt
+        echo "OS: ${{ matrix.os }}" >> build-output.txt
+        echo "Node Version: ${{ matrix.node-version }}" >> build-output.txt
+        echo "Build Time: $(date)" >> build-output.txt
+        echo "Runner: ${{ runner.name }}" >> build-output.txt
+        echo "Job Index: ${{ strategy.job-index }}" >> build-output.txt
+        echo "" >> build-output.txt
+        echo "Node.js Info:" >> build-output.txt
+        node --version >> build-output.txt
+        npm --version >> build-output.txt
+      shell: bash
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-41e29d1-${{ matrix.os }}-node${{ matrix.node-version }}  # Updated artifact name with prefix
+        path: build-output.txt
+        retention-days: 7
